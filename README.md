@@ -1,3 +1,120 @@
+# TPI — Taller de Algoritmos y Estructuras de Datos II
+
+| Integrantes | Profesor | Estado |
+|---|---|---|
+| Ramiro Contreras, Juan Bautista Ribotta | Pedro Requena | Caso 1 implementado; Caso 2 pendiente |
+
+Este README tiene dos partes: primero la documentación del proyecto (cómo compilar, ejecutar y usar el programa) y después el [enunciado original](#trabajo-práctico-integrador--algoritmos-y-estructuras-de-datos-ii) del trabajo.
+
+El plan de implementación del Caso 1, con las decisiones de diseño, la API de cada clase y el pseudocódigo, está en [`docs/plan-caso-1.md`](docs/plan-caso-1.md).
+
+## Requisitos
+
+- **JDK 25 (LTS)**. Por ejemplo, Eclipse Temurin 25 (`winget install EclipseAdoptium.Temurin.25.JDK` o desde https://adoptium.net). Verificar con `java -version`.
+- **Maven 3.9 o posterior**, o el Maven que trae IntelliJ IDEA. Verificar con `mvn -version`.
+- No hay dependencias externas: el `pom.xml` solo usa los plugins estándar de compilación y empaquetado.
+
+## Cómo compilar y ejecutar
+
+Desde la carpeta del proyecto:
+
+```bash
+mvn package
+java -jar target/tpi-taed2-1.0-SNAPSHOT.jar
+```
+
+Desde IntelliJ IDEA: *File → Open* y elegir la carpeta del proyecto (lo reconoce por el `pom.xml`). En *File → Project Structure → SDK* elegir JDK 25 y ejecutar la clase `tpi.Main`.
+
+## Caso 1: distribución de insumos entre centros logísticos
+
+### Estructura del código
+
+El código está separado en capas. Cada capa solo usa a la que está debajo:
+
+```
+consola  ──usa──▶  logica  ──usa──▶  modelo  ──usa──▶  estructuras
+```
+
+```
+src/main/java/tpi/
+├── Main.java                         punto de entrada: abre el menú del Caso 1
+├── estructuras/                      implementadas por el equipo, sin colecciones de Java
+│   ├── ListaEnlazada.java            listas de adyacencia y resultados
+│   ├── Cola.java                     BFS
+│   ├── Pila.java                     reconstrucción del camino de Dijkstra
+│   ├── MonticuloMinimo.java          Dijkstra (elegir el centro más cercano)
+│   └── ArbolAVL.java                 índice de centros por id
+└── caso1/
+    ├── modelo/
+    │   ├── Centro.java               vértice del grafo, con su lista de adyacencia
+    │   └── Ruta.java                 arista ponderada (minutos), bidireccional o de un sentido
+    ├── logica/                       nunca imprime: informa con excepciones u objetos Resultado
+    │   ├── RedLogistica.java         grafo + validaciones (altas, bajas, modificaciones)
+    │   ├── Dijkstra.java             camino de menor tiempo total
+    │   ├── Exploracion.java          recorridos BFS y DFS
+    │   ├── ResultadoCamino.java
+    │   ├── ResultadoExploracion.java
+    │   ├── OperacionInvalidaException.java
+    │   └── DatosIniciales.java       7 centros y 10 rutas del enunciado
+    └── consola/
+        ├── MenuCaso1.java            menú principal y submenús
+        ├── Entrada.java              lectura validada desde el teclado
+        └── Vista.java                formato de las salidas y dibujo de la red
+```
+
+### Uso del programa
+
+Al iniciar, la red se carga automáticamente con los datos del enunciado. El menú principal ofrece:
+
+| Opción | Qué hace |
+|---|---|
+| 1. Gestión de centros | Alta, modificar descripción, consultar por id, listar ordenados, baja y ver el árbol AVL del índice |
+| 2. Gestión de rutas | Alta (bidireccional o de un sentido), modificar tiempo, deshabilitar (baja temporal), habilitar, eliminar, aislar un centro y listar |
+| 3. Camino mínimo (Dijkstra) | Recorrido de menor tiempo total entre dos centros, con el orden de visita y el costo acumulado |
+| 4. Explorar la red (BFS / DFS) | Recorrido de exploración desde un centro, indicando el criterio de visita |
+| 5. Mostrar la red | Lista de adyacencia, matriz de tiempos y resumen |
+| 6. Restaurar datos iniciales | Descarta los cambios y vuelve a cargar los datos del enunciado |
+| 7. Ejecutar pruebas obligatorias | Corre las pruebas del enunciado sobre una red nueva, sin tocar la red en uso |
+
+Los identificadores se normalizan: se les quitan los espacios de los extremos y se pasan a mayúsculas, así que `a` y `A` son el mismo centro. Si se ingresa un dato inválido (letras donde va un número, un id duplicado, un tiempo negativo), el programa informa el problema y sigue funcionando.
+
+### Datos de prueba
+
+Son los del enunciado: 7 centros (A a G) y 10 rutas bidireccionales, con tiempos en minutos. Los carga `DatosIniciales` usando las mismas operaciones de alta que el menú. No se carga ningún resultado: todos se calculan en el momento.
+
+La opción 7 ejecuta, en este orden: A → F, A → G, B → E, A → A, A → Z (destino inexistente), Z → A (origen inexistente), aislar G, A → G y A → F. Estos son los resultados que muestra al ejecutarla:
+
+| Consulta | Resultado | Camino | Tiempo |
+|---|---|---|---|
+| A → F | Encontrado | A → C → D → F | 18 min |
+| A → G | Encontrado | A → C → E → G | 17 min |
+| B → E | Encontrado | B → C → E | 7 min |
+| A → A | Mismo centro | A | 0 min |
+| A → Z | Destino no registrado | — | — |
+| Z → A | Origen no registrado | — | — |
+| Aislar G | Deshabilita 2 rutas (E–G y F–G) | — | — |
+| A → G con G aislado | Sin recorrido | — | — |
+| A → F con G aislado | Encontrado (no cambia) | A → C → D → F | 18 min |
+
+Recorridos de exploración desde A (opción 4): BFS visita A, B, C, D, E, F, G y DFS visita A, B, C, D, F, E, G.
+
+### Formato de los archivos
+
+El Caso 1 no lee ni escribe archivos: los datos se guardan solo en memoria y se cargan al iniciar el programa.
+
+### Limitaciones conocidas
+
+- **Solo en memoria:** los cambios hechos desde el menú se pierden al cerrar el programa.
+- **DFS recursivo:** con miles de centros conectados en línea, la recursión podría desbordar la pila de llamadas de Java. La alternativa sería una versión iterativa con la `Pila` propia.
+- **Baja y aislamiento de un centro en O(V + E):** hay que recorrer todos los centros, porque una ruta de un solo sentido que llega a un centro está guardada solo en la lista de su origen.
+- **El id de un centro no se modifica:** es la clave del árbol AVL. Para cambiarlo hay que dar de baja el centro y volver a darlo de alta.
+- **Contar las rutas cuesta O(V + E):** se cuentan recorriendo la red en lugar de llevar un contador aparte.
+- **La matriz de tiempos se muestra hasta 20 centros:** con más no entra en pantalla, y se muestran solo la lista de adyacencia y el resumen.
+- **Tiempos enteros en minutos y no negativos:** es la condición que necesita Dijkstra.
+- **Caracteres de la consola:** las flechas y líneas se dibujan con ASCII (`->`, `+-`) para que se vean bien en cualquier consola de Windows.
+
+---
+
 # Trabajo Práctico Integrador — Algoritmos y Estructuras de Datos II
 
 **De un problema real a una solución algorítmica**
