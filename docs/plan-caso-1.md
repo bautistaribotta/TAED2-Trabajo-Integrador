@@ -209,8 +209,8 @@ public class RedLogistica {
     // --- Rutas (RF2) ---
     void altaRuta(String origen, String destino, int tiempo, boolean bidireccional);
     void modificarTiempoRuta(String origen, String destino, int nuevoTiempo);
-    void deshabilitarRuta(String origen, String destino);   // baja temporal
-    void habilitarRuta(String origen, String destino);
+    boolean deshabilitarRuta(String origen, String destino); // baja temporal; false si ya estaba deshabilitada
+    boolean habilitarRuta(String origen, String destino);    // false si ya estaba activa
     void eliminarRuta(String origen, String destino);       // baja definitiva
     int aislarCentro(String id);                  // deshabilita todas sus rutas; devuelve cuántas
     Ruta buscarRuta(String origen, String destino); // null si no hay ruta que permita ir de origen a destino
@@ -267,7 +267,7 @@ public class DatosIniciales {
 | Ruta de un centro a sí mismo | "Una ruta no puede unir un centro consigo mismo" |
 | Ruta duplicada: ya existe `buscarRuta(origen, destino)`, o es bidireccional y ya existe `buscarRuta(destino, origen)` | "Ya existe una ruta entre X e Y" |
 | Ruta inexistente (modificar, habilitar, deshabilitar, eliminar) | "No existe una ruta de X a Y" |
-| Deshabilitar una ruta ya deshabilitada (o habilitar una activa) | Informar sin error: "La ruta ya estaba deshabilitada" |
+| Deshabilitar una ruta ya deshabilitada (o habilitar una activa) | Informar sin error: "La ruta ya estaba deshabilitada". El método devuelve `false` y la consola muestra el mensaje |
 
 Nota: se permiten dos rutas de un solo sentido opuestas (A→B y B→A con tiempos distintos), porque es un caso real. Lo que no se permite es duplicar el mismo sentido.
 
