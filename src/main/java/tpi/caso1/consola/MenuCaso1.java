@@ -1,5 +1,6 @@
 package tpi.caso1.consola;
 
+import tpi.caso1.logica.DatosIniciales;
 import tpi.caso1.logica.Dijkstra;
 import tpi.caso1.logica.Exploracion;
 import tpi.caso1.logica.OperacionInvalidaException;
@@ -27,6 +28,8 @@ public class MenuCaso1 {
              3. Camino mínimo entre dos centros (Dijkstra)
              4. Explorar la red desde un centro (BFS / DFS)
              5. Mostrar la red
+             6. Restaurar datos iniciales del enunciado
+             7. Ejecutar pruebas obligatorias
              0. Salir""";
 
     private static final String MENU_CENTROS = """
@@ -55,9 +58,17 @@ public class MenuCaso1 {
     private final Entrada entrada;
     private RedLogistica red;
 
+    /** Crea el menú con la red ya cargada con los datos del enunciado. */
     public MenuCaso1() {
         this.entrada = new Entrada();
-        this.red = new RedLogistica();
+        this.red = redConDatosIniciales();
+    }
+
+    /** Devuelve una red nueva con los 7 centros y las 10 rutas del enunciado. */
+    private static RedLogistica redConDatosIniciales() {
+        RedLogistica nueva = new RedLogistica();
+        DatosIniciales.cargar(nueva);
+        return nueva;
     }
 
     /**
@@ -69,13 +80,15 @@ public class MenuCaso1 {
             int opcion;
             do {
                 System.out.println(MENU_PRINCIPAL);
-                opcion = entrada.leerEntero("Opción: ", 0, 5);
+                opcion = entrada.leerEntero("Opción: ", 0, 7);
                 switch (opcion) {
                     case 1 -> menuCentros();
                     case 2 -> menuRutas();
                     case 3 -> ejecutar(this::caminoMinimo);
                     case 4 -> ejecutar(this::explorar);
                     case 5 -> ejecutar(() -> System.out.println(Vista.red(red)));
+                    case 6 -> ejecutar(this::restaurarDatosIniciales);
+                    case 7 -> ejecutar(this::ejecutarPruebas);
                     default -> System.out.println("Fin del programa.");
                 }
             } while (opcion != 0);
@@ -262,5 +275,58 @@ public class MenuCaso1 {
         } else {
             System.out.println(Vista.exploracion(Exploracion.dfs(red, origen)));
         }
+    }
+
+    // ------------------------------------------------------------------
+    // 6 y 7. Datos iniciales y pruebas obligatorias
+    // ------------------------------------------------------------------
+
+    /** Descarta la red en uso y la reemplaza por una nueva con los datos del enunciado. */
+    private void restaurarDatosIniciales() {
+        if (entrada.leerSiNo("Se descartarán todos los cambios y se volverán a cargar los datos del enunciado. ¿Confirma?")) {
+            red = redConDatosIniciales();
+            System.out.println("Datos iniciales restaurados: " + red.cantidadCentros() + " centros y "
+                    + red.cantidadRutas() + " rutas.");
+        } else {
+            System.out.println("Operación cancelada.");
+        }
+    }
+
+    /**
+     * Ejecuta las pruebas mínimas obligatorias del enunciado sobre una red nueva, para no
+     * tocar la red que está usando el usuario. Cada resultado se calcula en el momento con
+     * Dijkstra: no hay resultados precargados.
+     */
+    private void ejecutarPruebas() {
+        RedLogistica prueba = redConDatosIniciales();
+        System.out.println("===== PRUEBAS OBLIGATORIAS DEL ENUNCIADO =====");
+        System.out.println("Se usa una red nueva con los datos iniciales (" + prueba.cantidadCentros()
+                + " centros y " + prueba.cantidadRutas() + " rutas bidireccionales).");
+        System.out.println("La red en uso no se modifica.");
+
+        mostrarPrueba(1, "Camino A -> F", prueba, "A", "F");
+        mostrarPrueba(2, "Camino A -> G", prueba, "A", "G");
+        mostrarPrueba(3, "Camino B -> E", prueba, "B", "E");
+        mostrarPrueba(4, "Camino A -> A (mismo centro)", prueba, "A", "A");
+        mostrarPrueba(5, "Camino A -> Z (destino inexistente)", prueba, "A", "Z");
+        mostrarPrueba(6, "Camino Z -> A (origen inexistente)", prueba, "Z", "A");
+
+        System.out.println("\n[7] Aislar el centro G");
+        int deshabilitadas = prueba.aislarCentro("G");
+        System.out.println("Se deshabilitaron " + deshabilitadas + " rutas:");
+        for (Ruta ruta : prueba.listarRutas()) {
+            if (!ruta.isActiva()) {
+                System.out.println("  " + ruta);
+            }
+        }
+
+        mostrarPrueba(8, "Camino A -> G (con G aislado)", prueba, "A", "G");
+        mostrarPrueba(9, "Camino A -> F (con G aislado)", prueba, "A", "F");
+    }
+
+    /** Muestra el número y el título de una prueba y la salida real de Dijkstra. */
+    private void mostrarPrueba(int numero, String titulo, RedLogistica prueba, String origen, String destino) {
+        System.out.println("\n[" + numero + "] " + titulo);
+        System.out.println(Vista.camino(Dijkstra.calcular(prueba, origen, destino)));
     }
 }
