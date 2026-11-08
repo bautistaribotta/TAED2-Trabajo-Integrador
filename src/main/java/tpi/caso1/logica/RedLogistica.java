@@ -116,6 +116,20 @@ public class RedLogistica {
         return centros.tamanio();
     }
 
+    /**
+     * Devuelve el dibujo del árbol AVL que indexa los centros, para mostrarlo en la consola.
+     * Se expone solo el dibujo y no el árbol, para que nadie pueda modificar el índice
+     * sin pasar por las validaciones de esta clase. Complejidad O(n).
+     */
+    public String dibujarIndice() {
+        return centros.dibujar();
+    }
+
+    /** Devuelve la altura del árbol AVL de centros (vacío = 0). Complejidad O(1). */
+    public int alturaIndice() {
+        return centros.altura();
+    }
+
     // ------------------------------------------------------------------
     // Rutas
     // ------------------------------------------------------------------

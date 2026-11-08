@@ -205,6 +205,8 @@ public class RedLogistica {
     ListaEnlazada<Centro> listarCentros();        // ordenados por id (inorden del AVL)
     void bajaCentro(String id);                   // también elimina todas sus rutas
     int cantidadCentros();
+    String dibujarIndice();                       // dibujo del AVL, para la opción "Ver árbol AVL"
+    int alturaIndice();                           // altura del AVL, para el resumen de la red
 
     // --- Rutas (RF2) ---
     void altaRuta(String origen, String destino, int tiempo, boolean bidireccional);
@@ -223,6 +225,7 @@ public class RedLogistica {
 public class ResultadoCamino {
     enum Estado { ENCONTRADO, MISMO_CENTRO, SIN_CAMINO, ORIGEN_INEXISTENTE, DESTINO_INEXISTENTE }
     Estado getEstado();
+    String getIdOrigen(); String getIdDestino();  // ids consultados, normalizados (para los mensajes)
     ListaEnlazada<Centro> getCamino();            // en orden origen → destino (vacía si no hay)
     ListaEnlazada<Integer> getCostosAcumulados(); // costo acumulado al llegar a cada centro del camino
     int getCostoTotal();                          // -1 si no hay camino
@@ -236,6 +239,7 @@ public class Dijkstra {
 public class ResultadoExploracion {
     enum Criterio { BFS, DFS }
     Criterio getCriterio();
+    String getIdOrigen();                         // id consultado, normalizado
     boolean isOrigenExiste();
     ListaEnlazada<Centro> getOrdenDeVisita();
     ListaEnlazada<Integer> getNiveles();          // BFS: cantidad de tramos desde el origen; DFS: profundidad
