@@ -2,11 +2,11 @@
 
 | Integrantes | Profesor | Estado |
 |---|---|---|
-| Ramiro Contreras, Juan Bautista Ribotta | Pedro Requena | Caso 1 implementado; Caso 2 pendiente |
+| Ramiro Contreras, Juan Bautista Ribotta | Pedro Requena | Casos 1 y 2 implementados |
 
 Este README tiene dos partes: primero la documentación del proyecto (cómo compilar, ejecutar y usar el programa) y después el [enunciado original](#trabajo-práctico-integrador--algoritmos-y-estructuras-de-datos-ii) del trabajo.
 
-El plan de implementación del Caso 1, con las decisiones de diseño, la API de cada clase y el pseudocódigo, está en [`docs/plan-caso-1.md`](docs/plan-caso-1.md).
+Los planes de implementación, con las decisiones de diseño, la API de cada clase y el pseudocódigo, están en [`docs/plan-caso-1.md`](docs/plan-caso-1.md) y [`docs/plan-caso-2.md`](docs/plan-caso-2.md).
 
 ## Requisitos
 
@@ -25,9 +25,18 @@ java -jar target/tpi-taed2-1.0-SNAPSHOT.jar
 
 Desde IntelliJ IDEA: *File → Open* y elegir la carpeta del proyecto (lo reconoce por el `pom.xml`). En *File → Project Structure → SDK* elegir JDK 25 y ejecutar la clase `tpi.Main`.
 
-## Caso 1: distribución de insumos entre centros logísticos
+Al iniciar se muestra un menú principal para elegir el caso:
 
-### Estructura del código
+```
+===== TPI - TALLER DE ALGORITMOS Y ESTRUCTURAS DE DATOS II =====
+ 1. Caso 1: Distribución de insumos entre centros logísticos
+ 2. Caso 2: Archivo histórico de mensajes de sensores
+ 0. Salir
+```
+
+Desde cada caso, la opción 0 vuelve a este menú. Los cambios hechos en la red del Caso 1 se conservan mientras el programa esté abierto.
+
+## Estructura del código
 
 El código está separado en capas. Cada capa solo usa a la que está debajo:
 
@@ -37,34 +46,59 @@ consola  ──usa──▶  logica  ──usa──▶  modelo  ──usa──
 
 ```
 src/main/java/tpi/
-├── Main.java                         punto de entrada: abre el menú del Caso 1
+├── Main.java                         punto de entrada: abre el menú principal
+├── consola/                          compartido por los dos casos
+│   ├── MenuPrincipal.java            elegir Caso 1, Caso 2 o salir
+│   └── Entrada.java                  lectura validada desde el teclado (un solo Scanner)
 ├── estructuras/                      implementadas por el equipo, sin colecciones de Java
 │   ├── ListaEnlazada.java            listas de adyacencia y resultados
 │   ├── Cola.java                     BFS
 │   ├── Pila.java                     reconstrucción del camino de Dijkstra
-│   ├── MonticuloMinimo.java          Dijkstra (elegir el centro más cercano)
-│   └── ArbolAVL.java                 índice de centros por id
-└── caso1/
+│   ├── MonticuloMinimo.java          Dijkstra y construcción del árbol de Huffman
+│   ├── ArbolAVL.java                 índice de centros por id
+│   ├── ArbolHuffman.java             códigos, serialización en preorden y decodificación
+│   ├── EscritorBits.java             empaqueta bits sueltos en bytes
+│   └── LectorBits.java               lee bits sueltos de un arreglo de bytes
+├── caso1/
+│   ├── modelo/
+│   │   ├── Centro.java               vértice del grafo, con su lista de adyacencia
+│   │   └── Ruta.java                 arista ponderada (minutos), bidireccional o de un sentido
+│   ├── logica/                       nunca imprime: informa con excepciones u objetos Resultado
+│   │   ├── RedLogistica.java         grafo + validaciones (altas, bajas, modificaciones)
+│   │   ├── Dijkstra.java             camino de menor tiempo total
+│   │   ├── Exploracion.java          recorridos BFS y DFS
+│   │   ├── ResultadoCamino.java
+│   │   ├── ResultadoExploracion.java
+│   │   ├── OperacionInvalidaException.java
+│   │   └── DatosIniciales.java       7 centros y 10 rutas del enunciado
+│   └── consola/
+│       ├── MenuCaso1.java            menú del caso y submenús
+│       └── Vista.java                formato de las salidas y dibujo de la red
+└── caso2/
     ├── modelo/
-    │   ├── Centro.java               vértice del grafo, con su lista de adyacencia
-    │   └── Ruta.java                 arista ponderada (minutos), bidireccional o de un sentido
-    ├── logica/                       nunca imprime: informa con excepciones u objetos Resultado
-    │   ├── RedLogistica.java         grafo + validaciones (altas, bajas, modificaciones)
-    │   ├── Dijkstra.java             camino de menor tiempo total
-    │   ├── Exploracion.java          recorridos BFS y DFS
-    │   ├── ResultadoCamino.java
-    │   ├── ResultadoExploracion.java
-    │   ├── OperacionInvalidaException.java
-    │   └── DatosIniciales.java       7 centros y 10 rutas del enunciado
+    │   ├── TablaFrecuencias.java     apariciones de cada byte (arreglo de 256)
+    │   └── TablaCodigos.java         código de Huffman de cada byte
+    ├── logica/                       trabaja en memoria; solo GestorArchivos toca el disco
+    │   ├── CompresorHuffman.java     comprimir y descomprimir (byte[] → byte[])
+    │   ├── FormatoHuf.java           formato del archivo comprimido y su cabecera
+    │   ├── SumaAdler32.java          suma de verificación
+    │   ├── GestorArchivos.java       leer, escribir y comparar archivos
+    │   ├── ArchivosDePrueba.java     contenido de T1 a T6
+    │   ├── ResultadoCompresion.java
+    │   ├── ResultadoDescompresion.java
+    │   ├── ResultadoComparacion.java
+    │   ├── ArchivoDanadoException.java
+    │   └── OperacionArchivoException.java
     └── consola/
-        ├── MenuCaso1.java            menú principal y submenús
-        ├── Entrada.java              lectura validada desde el teclado
-        └── Vista.java                formato de las salidas y dibujo de la red
+        ├── MenuCaso2.java            menú del caso
+        └── VistaCaso2.java           formato de las salidas
 ```
+
+## Caso 1: distribución de insumos entre centros logísticos
 
 ### Uso del programa
 
-Al iniciar, la red se carga automáticamente con los datos del enunciado. El menú principal ofrece:
+Al iniciar, la red se carga automáticamente con los datos del enunciado. El menú del Caso 1 ofrece:
 
 | Opción | Qué hace |
 |---|---|
@@ -112,6 +146,77 @@ El Caso 1 no lee ni escribe archivos: los datos se guardan solo en memoria y se 
 - **La matriz de tiempos se muestra hasta 20 centros:** con más no entra en pantalla, y se muestran solo la lista de adyacencia y el resumen.
 - **Tiempos enteros en minutos y no negativos:** es la condición que necesita Dijkstra.
 - **Caracteres de la consola:** las flechas y líneas se dibujan con ASCII (`->`, `+-`) para que se vean bien en cualquier consola de Windows.
+
+## Caso 2: archivo histórico de mensajes de sensores
+
+Comprime y descomprime archivos cualesquiera (texto o binarios, cualquier byte de 0 a 255) con **codificación de Huffman**, sin perder información. Cada archivo comprimido es autónomo: lleva adentro todo lo necesario para reconstruir el original.
+
+### Uso del programa
+
+| Opción | Qué hace |
+|---|---|
+| 1. Comprimir un archivo | Pide el archivo y dónde guardar el `.huf` (por defecto, el mismo nombre con `.huf` agregado). Informa tamaño original, tamaño comprimido desglosado, porcentaje de reducción o aumento y tiempo de proceso |
+| 2. Descomprimir un archivo | Descomprime en memoria y valida todo; solo si el archivo es válido pregunta dónde guardar el resultado (por defecto, sin `.huf` y con `.restaurado`). Opcionalmente lo compara con el original |
+| 3. Ida y vuelta | Comprime, guarda el `.huf`, lo vuelve a leer del disco, lo descomprime, guarda el `.restaurado` y lo compara byte a byte con el original |
+| 4. Frecuencias, códigos y árbol | Tabla de cada byte con su frecuencia, código y longitud; longitud promedio; dibujo del árbol si tiene hasta 32 hojas |
+| 5. Comparar dos archivos | Indica si son iguales byte a byte o la posición del primer byte distinto |
+| 6. Generar archivos de prueba | Escribe T1 a T6 en una carpeta (por defecto `pruebas-caso2/`, que no se sube al repositorio) |
+| 7. Ejecutar pruebas obligatorias | Comprime, descomprime y compara T1 a T5 en memoria, e intenta descomprimir T6 esperando el rechazo |
+
+Las rutas pueden ser relativas a la carpeta desde donde se ejecuta el programa o absolutas, con o sin comillas. Antes de sobrescribir un archivo se pide confirmación, y la salida nunca puede ser el mismo archivo que la entrada.
+
+### Datos de prueba
+
+Los genera la opción 6. No se suben al repositorio porque se obtienen siempre iguales:
+
+| Archivo | Contenido |
+|---|---|
+| `T1-vacio.bin` | 0 bytes |
+| `T2-simbolo-unico.bin` | 10.000 veces el byte 65 (`A`) |
+| `T3-todos-los-bytes.bin` | los valores 0 a 255, una vez cada uno |
+| `T4-muestra.txt` | la muestra de mensajes del enunciado en UTF-8, sin salto de línea final (39 bytes) |
+| `T5-binario.bin` | 102.400 bytes: 6.400 registros binarios de 16 bytes que simulan reportes de sensores, generados con semilla fija |
+| `T6-truncado.huf` | T5 comprimido y cortado a la mitad |
+
+Resultados de la opción 7:
+
+| Prueba | Original | Comprimido | Resultado | Restaurado |
+|---|---|---|---|---|
+| T1 | 0 B | 19 B | no aplica (original vacío) | igual |
+| T2 | 10.000 B | 1.271 B | reducción del 87,29 % | igual |
+| T3 | 256 B | 595 B | aumento del 132,42 % | igual |
+| T4 | 39 B | 42 B | aumento del 7,69 % | igual |
+| T5 | 102.400 B | 77.048 B | reducción del 24,76 % | igual |
+| T6 | 38.524 B | — | rechazado: "El archivo está truncado: faltan datos comprimidos" | sin archivo de salida |
+
+Los tamaños de T1 a T4 coinciden con los calculados a mano en el plan. En T4 los códigos son `R` 00, `O` 01, `|` 10, `K` 111, `E` 1100, `A` 11010, `L` 110110 y `T` 110111: 105 bits de datos, 2,69 bits por símbolo en lugar de 8.
+
+### Formato del archivo comprimido
+
+El archivo comprimido (`.huf`) tiene una cabecera fija de 19 bytes y después un flujo de bits. Los enteros se guardan en big-endian.
+
+| Posición | Tamaño | Campo | Valores válidos |
+|---|---|---|---|
+| 0 | 4 bytes | Firma | `T` `H` `U` `F` |
+| 4 | 1 byte | Versión del formato | 1 |
+| 5 | 8 bytes | Tamaño original en bytes | 0 a 2.147.483.639 |
+| 13 | 4 bytes | Suma Adler-32 del contenido original | cualquiera |
+| 17 | 2 bytes | Cantidad de símbolos distintos (n) | 0 a 256; 0 solo si el original está vacío |
+| 19 | variable | Árbol de Huffman en preorden y, a continuación, los datos codificados | — |
+| final | 0 a 7 bits | Relleno con ceros hasta completar el último byte | todos 0 |
+
+- **Árbol en preorden:** cada hoja se escribe como un bit `1` seguido de los 8 bits del símbolo, y cada nodo interno como un bit `0` seguido de su subárbol izquierdo y su subárbol derecho. Ocupa 10n − 1 bits.
+- **Datos:** el código de cada byte del original, en orden; el primer bit de cada byte es el más significativo. Si hay un solo símbolo distinto, su código es `0`.
+- **Validaciones al descomprimir:** largo mínimo, firma, versión, tamaño original, cantidad de símbolos, bits suficientes, árbol válido (n hojas, sin símbolos repetidos), datos completos, sin bytes de más, relleno en cero y suma Adler-32. Si alguna falla, se informa el motivo y no se genera ningún archivo.
+
+### Limitaciones conocidas
+
+- **Todo en memoria:** el archivo se lee completo, así que el máximo es de unos 2 GB (el tamaño máximo de un arreglo de Java).
+- **Los archivos chicos crecen:** la cabecera de 19 bytes y el árbol son un costo fijo (T1, T4).
+- **Sin repeticiones no hay ganancia:** con los 256 bytes equiprobables, cada uno sigue ocupando 8 bits, más el árbol (T3).
+- **Un símbolo cuesta al menos 1 bit:** la reducción máxima es del 87,5 %, aunque el archivo sea totalmente repetitivo (T2). Huffman mira la frecuencia de cada byte suelto, no las secuencias repetidas; para eso harían falta técnicas como LZ77, que no son parte de la materia.
+- **Tiempo informado:** mide solo el proceso en memoria, sin la lectura ni la escritura en disco.
+- **Adler-32:** detecta errores accidentales, no modificaciones intencionales, y es algo más débil en archivos de pocos cientos de bytes. En esos casos un daño suele romper antes el árbol, la longitud o el relleno.
 
 ---
 
