@@ -215,6 +215,120 @@ public class ArbolHuffman {
     }
 
     // ------------------------------------------------------------------
+    // Serialización: guardar el árbol como bits y volver a leerlo
+    // ------------------------------------------------------------------
+
+    /**
+     * Cantidad de bits que ocupa el árbol al escribirlo en preorden: 9 por hoja (1 bit de
+     * marca y 8 del símbolo) y 1 por nodo interno. Un árbol con n hojas tiene n - 1 nodos
+     * internos, así que el total es 9n + (n - 1) = 10n - 1. Vale 0 si el árbol está vacío.
+     */
+    public long bitsSerializado() {
+        return hojas == 0 ? 0 : 10L * hojas - 1;
+    }
+
+    /**
+     * Escribe el árbol en preorden: primero el nodo, después el subárbol izquierdo y después
+     * el derecho. Cada hoja se escribe como un bit 1 seguido de los 8 bits del símbolo, y
+     * cada nodo interno como un bit 0.
+     *
+     * Ejemplo: una raíz interna con 'O' a la izquierda y 'K' a la derecha se escribe
+     * 0, 1 01001111, 1 01001011.
+     *
+     * No hace falta guardar las frecuencias: para decodificar solo importa la forma del
+     * árbol y qué símbolo hay en cada hoja.
+     */
+    public void escribirEnPreorden(EscritorBits salida) {
+        if (raiz != null) {
+            escribirEnPreorden(raiz, salida);
+        }
+    }
+
+    private static void escribirEnPreorden(NodoHuffman nodo, EscritorBits salida) {
+        if (nodo.esHoja()) {
+            salida.escribirBit(1);
+            salida.escribirByte(nodo.simbolo);
+            return;
+        }
+        salida.escribirBit(0);
+        escribirEnPreorden(nodo.izquierdo, salida);
+        escribirEnPreorden(nodo.derecho, salida);
+    }
+
+    /** Estado de una lectura en curso: qué símbolos ya aparecieron y cuántas hojas se leyeron. */
+    private static final class Lectura {
+        final LectorBits entrada;
+        final int hojasEsperadas;
+        final boolean[] simboloVisto = new boolean[SIMBOLOS];
+        int hojasLeidas = 0;
+
+        Lectura(LectorBits entrada, int hojasEsperadas) {
+            this.entrada = entrada;
+            this.hojasEsperadas = hojasEsperadas;
+        }
+    }
+
+    /**
+     * Profundidad máxima de un árbol válido: con 256 hojas, el árbol más desparejo posible
+     * tiene una hoja por nivel y llega a profundidad 255.
+     */
+    private static final int PROFUNDIDAD_MAXIMA = SIMBOLOS - 1;
+
+    /**
+     * Lee un árbol escrito con escribirEnPreorden. Es la operación inversa: un bit 1 es una
+     * hoja (y los 8 bits siguientes son su símbolo); un bit 0 es un nodo interno, y a
+     * continuación vienen su subárbol izquierdo y su subárbol derecho.
+     *
+     * Como el árbol puede venir de un archivo dañado, se controla que sea válido:
+     * - que no se terminen los bits a mitad del árbol;
+     * - que ningún símbolo aparezca dos veces;
+     * - que la cantidad de hojas sea la esperada (la que dice la cabecera del archivo);
+     * - que la profundidad no pase de 255. Sin este límite, un archivo dañado lleno de bits 0
+     *   haría que la recursión baje sin fin hasta desbordar la pila de llamadas.
+     *
+     * @param entrada        lector posicionado al principio del árbol
+     * @param hojasEsperadas cantidad de símbolos distintos (0 a 256); con 0 no se lee nada
+     * @return el árbol leído, sin frecuencias
+     * @throws IllegalStateException si el árbol es inválido o faltan bits
+     */
+    public static ArbolHuffman leerEnPreorden(LectorBits entrada, int hojasEsperadas) {
+        if (hojasEsperadas < 0 || hojasEsperadas > SIMBOLOS) {
+            throw new IllegalStateException("Cantidad de hojas inválida: " + hojasEsperadas);
+        }
+        if (hojasEsperadas == 0) {
+            return new ArbolHuffman(null, 0, false);
+        }
+        Lectura lectura = new Lectura(entrada, hojasEsperadas);
+        NodoHuffman raiz = leerNodo(lectura, 0);
+        if (lectura.hojasLeidas != hojasEsperadas) {
+            throw new IllegalStateException("El árbol tiene " + lectura.hojasLeidas
+                    + " hojas y se esperaban " + hojasEsperadas);
+        }
+        return new ArbolHuffman(raiz, hojasEsperadas, false);
+    }
+
+    private static NodoHuffman leerNodo(Lectura lectura, int profundidad) {
+        if (profundidad > PROFUNDIDAD_MAXIMA) {
+            throw new IllegalStateException("El árbol es más profundo de lo posible");
+        }
+        if (lectura.entrada.leerBit() == 1) {
+            int simbolo = lectura.entrada.leerByte();
+            if (lectura.simboloVisto[simbolo]) {
+                throw new IllegalStateException("El símbolo " + nombreSimbolo(simbolo) + " aparece dos veces");
+            }
+            lectura.simboloVisto[simbolo] = true;
+            lectura.hojasLeidas++;
+            if (lectura.hojasLeidas > lectura.hojasEsperadas) {
+                throw new IllegalStateException("El árbol tiene más hojas de las esperadas");
+            }
+            return new NodoHuffman(simbolo, 0);
+        }
+        NodoHuffman izquierdo = leerNodo(lectura, profundidad + 1);
+        NodoHuffman derecho = leerNodo(lectura, profundidad + 1);
+        return new NodoHuffman(izquierdo, derecho);
+    }
+
+    // ------------------------------------------------------------------
     // Dibujo
     // ------------------------------------------------------------------
 
