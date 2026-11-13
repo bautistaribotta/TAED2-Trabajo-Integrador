@@ -10,3 +10,9 @@ out/
 # Sistema operativo
 .DS_Store
 Thumbs.db
+
+# Archivos de prueba que genera el Caso 2
+pruebas-caso2/
+
+# Bloqueos de LibreOffice mientras un documento está abierto
+.~lock.*#

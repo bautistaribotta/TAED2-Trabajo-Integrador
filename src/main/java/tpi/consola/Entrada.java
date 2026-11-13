@@ -1,17 +1,22 @@
-package tpi.caso1.consola;
+package tpi.consola;
 
 import java.nio.charset.Charset;
 import java.util.Scanner;
 
 /**
- * Lectura validada de datos desde el teclado.
+ * Lectura validada de datos desde el teclado, compartida por los menús de los dos casos.
  *
  * Envuelve un único Scanner sobre System.in. Cada método insiste hasta que el usuario
  * ingresa un valor con el formato correcto (por ejemplo, un número donde se pide un número),
  * así el resto del programa recibe siempre datos bien formados.
  *
- * Solo controla el formato. Las reglas de negocio (id duplicado, tiempo negativo, etc.)
- * las valida RedLogistica.
+ * Tiene que haber un solo objeto Entrada en todo el programa: si cada menú creara su
+ * propio Scanner sobre System.in, uno podría quedarse con texto que ya leyó del teclado
+ * y que en realidad le correspondía al otro. Por eso lo crea MenuPrincipal y se lo pasa
+ * a cada menú.
+ *
+ * Solo controla el formato. Las reglas de negocio (id duplicado, tiempo negativo,
+ * archivo inexistente, etc.) las valida la lógica de cada caso.
  */
 public class Entrada {
 

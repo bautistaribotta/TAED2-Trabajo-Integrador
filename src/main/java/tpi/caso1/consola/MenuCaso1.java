@@ -7,6 +7,7 @@ import tpi.caso1.logica.OperacionInvalidaException;
 import tpi.caso1.logica.RedLogistica;
 import tpi.caso1.modelo.Centro;
 import tpi.caso1.modelo.Ruta;
+import tpi.consola.Entrada;
 
 /**
  * Menú principal del Caso 1 y sus submenús.
@@ -30,7 +31,7 @@ public class MenuCaso1 {
              5. Mostrar la red
              6. Restaurar datos iniciales del enunciado
              7. Ejecutar pruebas obligatorias
-             0. Salir""";
+             0. Volver al menú principal""";
 
     private static final String MENU_CENTROS = """
 
@@ -58,9 +59,13 @@ public class MenuCaso1 {
     private final Entrada entrada;
     private RedLogistica red;
 
-    /** Crea el menú con la red ya cargada con los datos del enunciado. */
-    public MenuCaso1() {
-        this.entrada = new Entrada();
+    /**
+     * Crea el menú con la red ya cargada con los datos del enunciado.
+     *
+     * @param entrada lectura del teclado compartida con el resto del programa
+     */
+    public MenuCaso1(Entrada entrada) {
+        this.entrada = entrada;
         this.red = redConDatosIniciales();
     }
 
@@ -72,29 +77,32 @@ public class MenuCaso1 {
     }
 
     /**
-     * Muestra el menú principal hasta que el usuario elige salir, o hasta que se termina
-     * la entrada (por ejemplo, si se cierra la consola).
+     * Muestra el menú del Caso 1 hasta que el usuario elige volver al menú principal.
+     *
+     * La red se guarda en este objeto, así que los cambios se conservan si el usuario
+     * vuelve al menú principal y después entra de nuevo al Caso 1.
+     *
+     * @throws Entrada.EntradaTerminadaException si se termina la entrada; la atrapa
+     *         MenuPrincipal, que es quien termina el programa
      */
     public void iniciar() {
-        try {
-            int opcion;
-            do {
-                System.out.println(MENU_PRINCIPAL);
-                opcion = entrada.leerEntero("Opción: ", 0, 7);
-                switch (opcion) {
-                    case 1 -> menuCentros();
-                    case 2 -> menuRutas();
-                    case 3 -> ejecutar(this::caminoMinimo);
-                    case 4 -> ejecutar(this::explorar);
-                    case 5 -> ejecutar(() -> System.out.println(Vista.red(red)));
-                    case 6 -> ejecutar(this::restaurarDatosIniciales);
-                    case 7 -> ejecutar(this::ejecutarPruebas);
-                    default -> System.out.println("Fin del programa.");
+        int opcion;
+        do {
+            System.out.println(MENU_PRINCIPAL);
+            opcion = entrada.leerEntero("Opción: ", 0, 7);
+            switch (opcion) {
+                case 1 -> menuCentros();
+                case 2 -> menuRutas();
+                case 3 -> ejecutar(this::caminoMinimo);
+                case 4 -> ejecutar(this::explorar);
+                case 5 -> ejecutar(() -> System.out.println(Vista.red(red)));
+                case 6 -> ejecutar(this::restaurarDatosIniciales);
+                case 7 -> ejecutar(this::ejecutarPruebas);
+                default -> {
+                    // 0: volver al menú principal
                 }
-            } while (opcion != 0);
-        } catch (Entrada.EntradaTerminadaException e) {
-            System.out.println("\nNo hay más datos de entrada. Fin del programa.");
-        }
+            }
+        } while (opcion != 0);
     }
 
     /**
