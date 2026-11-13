@@ -329,6 +329,40 @@ public class ArbolHuffman {
     }
 
     // ------------------------------------------------------------------
+    // Decodificación
+    // ------------------------------------------------------------------
+
+    /**
+     * Lee los bits de un código y devuelve el símbolo que representa.
+     *
+     * Se parte de la raíz y, por cada bit, se baja a la izquierda (0) o a la derecha (1)
+     * hasta llegar a una hoja. Como el código es libre de prefijos, al llegar a una hoja el
+     * código terminó sin ambigüedad. Complejidad O(longitud del código).
+     *
+     * Si el árbol es una sola hoja, cada símbolo se codificó con el bit 0 (ver
+     * generarCodigos): se lee un bit y tiene que ser 0.
+     *
+     * @throws IllegalStateException si se terminan los bits a mitad de un código, si el
+     *         árbol está vacío o si, con una sola hoja, el bit leído es 1
+     */
+    public int decodificarSimbolo(LectorBits entrada) {
+        if (raiz == null) {
+            throw new IllegalStateException("No se puede decodificar con un árbol vacío");
+        }
+        if (raiz.esHoja()) {
+            if (entrada.leerBit() != 0) {
+                throw new IllegalStateException("Con un solo símbolo, todos los bits deben ser 0");
+            }
+            return raiz.simbolo;
+        }
+        NodoHuffman nodo = raiz;
+        while (!nodo.esHoja()) {
+            nodo = entrada.leerBit() == 0 ? nodo.izquierdo : nodo.derecho;
+        }
+        return nodo.simbolo;
+    }
+
+    // ------------------------------------------------------------------
     // Dibujo
     // ------------------------------------------------------------------
 
