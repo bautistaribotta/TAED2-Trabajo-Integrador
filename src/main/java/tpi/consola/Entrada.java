@@ -74,6 +74,15 @@ public class Entrada {
     }
 
     /**
+     * Lee un texto con un valor por defecto: si el usuario solo presiona Enter, devuelve
+     * ese valor. El mensaje muestra el valor por defecto entre corchetes.
+     */
+    public String leerTexto(String mensaje, String porDefecto) {
+        String texto = leerLinea(mensaje + " [" + porDefecto + "]: ");
+        return texto.isEmpty() ? porDefecto : texto;
+    }
+
+    /**
      * Lee cualquier número entero, incluso negativo. Se usa cuando quien decide si el
      * valor es válido es la lógica (por ejemplo, el tiempo de una ruta).
      */
