@@ -118,7 +118,7 @@ TablaFrecuencias                    ArbolHuffman
 - **Por qué un arreglo y no un AVL para las frecuencias:** el alfabeto es fijo y chico (256 valores) y el propio byte sirve de índice. Contar es O(1) por byte, sin comparaciones. Un AVL de símbolos tardaría O(log 256) por byte y ocuparía más memoria por nodo. El AVL conviene cuando las claves son muchas y no se conocen de antemano, que no es este caso.
 - **Por qué un heap:** Huffman extrae dos veces el mínimo y vuelve a insertar, n − 1 veces. Con heap cada paso es O(log n) y la construcción es O(n log n). Con una lista desordenada cada extracción es O(n), y el total es O(n²). Con una lista ordenada, extraer es O(1) pero insertar es O(n), y el total también es O(n²). Con n ≤ 256 la diferencia es chica, pero el heap es la estructura correcta y además ya la tenemos.
 - **Por qué `long` en las frecuencias:** la suma total y el cálculo de bits de salida (frecuencia × longitud del código) pueden superar `int` en archivos grandes.
-- **Por qué un `long` alcanza para cada código:** un archivo en memoria tiene como mucho unos 2^31 bytes. Para que un código tenga longitud d, la suma de frecuencias tiene que ser al menos el número de Fibonacci F(d + 2), y F(47) ya supera 2^31; por eso ningún código pasa de 45 bits, que entran en los 64 de un `long`.
+- **Por qué un `long` alcanza para cada código:** un archivo en memoria tiene como mucho unos 2^31 bytes. Para que un código tenga longitud d, la suma de frecuencias tiene que ser al menos el número de Fibonacci F(d + 2), y F(47) = 2.971.215.073 ya supera el tamaño máximo admitido (2.147.483.639 bytes). Por eso d + 2 ≤ 46 y ningún código pasa de 44 bits, que entran de sobra en los 64 de un `long`.
 
 ---
 
@@ -152,7 +152,7 @@ public class ArbolHuffman {
     int altura();
     void generarCodigos(long[] bits, int[] longitudes); // llena los arreglos recorriendo el árbol
     void escribirEnPreorden(EscritorBits salida);       // serialización (sección 4.2)
-    static ArbolHuffman leerEnPreorden(LectorBits entrada, int hojasEsperadas); // excepción si es inválido
+    static ArbolHuffman leerEnPreorden(LectorBits entrada, int hojasEsperadas); // IllegalStateException si es inválido
     int decodificarSimbolo(LectorBits entrada); // baja desde la raíz siguiendo bits hasta una hoja
     String dibujar();                            // dibujo ASCII, para el menú y el informe
     long bitsSerializado();                      // 10·hojas − 1 (0 si está vacío)
@@ -290,7 +290,7 @@ escribir(nodo):
 | Frecuencias: n × (1 byte de símbolo + 4 bytes de frecuencia) | 5n bytes | 40 bytes | 1.280 bytes | El descompresor debe reconstruir el árbol con **exactamente** el mismo desempate |
 | Frecuencias de los 256 valores, fijas | 1.024 bytes | 1.024 bytes | 1.024 bytes | Simple, pero inaceptable para archivos chicos |
 | **Árbol en preorden (elegida)** | 10n − 1 bits | 79 bits ≈ 10 bytes | 2.559 bits ≈ 320 bytes | Es lo mínimo que se necesita: la forma del árbol y qué símbolo hay en cada hoja |
-| Longitudes de códigos canónicos | n bytes + n símbolos | 16 bytes | 256 bytes | Más compacta para n grande, pero agrega el concepto de código canónico, que no se vio en la materia |
+| Longitudes de códigos canónicos | 2n bytes (símbolo y longitud), o 256 bytes fijos con la longitud de cada valor | 16 bytes | 256 bytes | Más compacta para n grande, pero agrega el concepto de código canónico, que no se vio en la materia |
 
 ### 4.3 Codificación de los datos
 
@@ -337,7 +337,10 @@ Cada fase tiene tareas concretas y una **definición de terminado**. Los casos a
 ### Fase 0 — Preparar el proyecto
 
 1. Crear el paquete `tpi.consola` y mover `Entrada` ahí. Actualizar el import en `MenuCaso1` y `Vista` si lo usan.
-2. `MenuCaso1` recibe la `Entrada` por constructor en lugar de crearla.
+2. Cambios en `MenuCaso1`:
+   - recibe la `Entrada` por constructor en lugar de crearla;
+   - la opción 0 pasa a ser "0. Volver al menú principal" y ya no imprime "Fin del programa";
+   - deja de atrapar `EntradaTerminadaException`: la atrapa `MenuPrincipal`, que es quien termina el programa cuando se acaba la entrada.
 3. Crear `MenuPrincipal`:
    ```
    ===== TPI — TALLER DE ALGORITMOS Y ESTRUCTURAS DE DATOS II =====
@@ -345,10 +348,12 @@ Cada fase tiene tareas concretas y una **definición de terminado**. Los casos a
     2. Caso 2: Archivo histórico de mensajes de sensores
     0. Salir
    ```
-   Al volver de un caso se regresa a este menú. La red del Caso 1 se conserva mientras el programa esté abierto.
+   Al volver de un caso se regresa a este menú. `MenuPrincipal` crea **una sola vez** el `MenuCaso1` y el `MenuCaso2`, así la red del Caso 1 conserva los cambios mientras el programa esté abierto.
 4. `Main` abre `MenuPrincipal`.
 5. Crear los paquetes de `caso2` vacíos.
-6. Agregar `pruebas-caso2/` al `.gitignore` (ahí se generan los archivos de prueba; no se suben).
+6. Agregar al `.gitignore`:
+   - `pruebas-caso2/`, donde se generan los archivos de prueba (no se suben);
+   - `.~lock.*#`, los archivos de bloqueo que crea LibreOffice mientras el Word está abierto.
 
 **Terminado cuando:** `mvn package` compila y el Caso 1 se comporta igual que antes, ahora entrando por el menú principal.
 
@@ -401,7 +406,7 @@ generar(nodo, codigo, longitud):
 
 **Casos a verificar:**
 - Frecuencias de T4: `O` 9, `|` 9, `K` 7, `R` 7, `E` 3, `A` 2, `L` 1, `T` 1; total 39; 8 distintos.
-- Árbol de T4: los códigos deben coincidir con la tabla de la sección 6.3.
+- Árbol de T4: los códigos deben coincidir con la tabla de la Fase 8.3.
 - Ningún código es prefijo de otro (recorrer los pares).
 - 256 símbolos con frecuencia 1: todos los códigos miden 8 bits.
 - Construir dos veces con las mismas frecuencias da exactamente los mismos códigos.
@@ -446,7 +451,7 @@ comprimir(original):
 - Si `tamanio` supera la capacidad de un arreglo de Java, se rechaza con un mensaje claro (límite documentado).
 - `getPorcentaje() = (original − comprimido) / original × 100`. Si el original mide 0, devuelve `NaN` y la consola muestra "no aplica (archivo vacío)".
 
-**Casos a verificar:** los tamaños de la sección 6.3 para T1 a T4.
+**Casos a verificar:** los tamaños de la Fase 8.3 para T1 a T4.
 
 ### Fase 5 — Descompresión y detección de daños (RF3 y RF6)
 
@@ -467,7 +472,7 @@ descomprimir(datos):
 ```
 
 - `decodificarSimbolo`: desde la raíz, mientras el nodo no sea hoja, leer un bit e ir a la izquierda (0) o a la derecha (1). Si la raíz es una hoja (símbolo único), leer un bit que debe ser 0.
-- Toda `IllegalStateException` del lector se transforma en `ArchivoDanadoException`. **Nunca** se informa éxito ni se escribe un archivo parcial.
+- Toda `IllegalStateException` que lancen `LectorBits` o `ArbolHuffman.leerEnPreorden` se transforma en `ArchivoDanadoException` (las estructuras no conocen las excepciones de la lógica). **Nunca** se informa éxito ni se escribe un archivo parcial.
 
 **Casos a verificar** (además de T6):
 - archivo de 10 bytes cualquiera (demasiado corto);
@@ -500,7 +505,7 @@ descomprimir(datos):
 
 - **1. Comprimir:** pide la ruta de entrada y la de salida (por defecto, la de entrada con `.huf` agregado). Muestra:
   ```
-  Compresión de pruebas-caso2/T4.txt
+  Compresión de pruebas-caso2/T4-muestra.txt
     Tamaño original:     39 bytes
     Tamaño comprimido:   42 bytes  (cabecera 19 + árbol 79 bits + datos 105 bits + relleno 0 bits)
     Resultado:           aumento del 7,69 %
@@ -510,6 +515,7 @@ descomprimir(datos):
 - **2. Descomprimir:** pide el `.huf` y la ruta de salida (por defecto, quitando `.huf` y agregando `.restaurado`). Opcionalmente pide el original para comparar byte a byte. Si el archivo está dañado, muestra "No se pudo descomprimir: " seguido del motivo, y aclara que no se generó ningún archivo.
 - **3. Ida y vuelta:** comprime, escribe el `.huf`, lo vuelve a leer **desde disco**, lo descomprime, escribe el restaurado y compara con el original. Termina con "Verificación byte a byte: IGUALES" o con la posición de la primera diferencia.
 - **4. Análisis:** tabla con símbolo, frecuencia, código y longitud, ordenada por símbolo; longitud promedio en bits por símbolo, comparada con 8; dibujo del árbol solo si tiene hasta 32 hojas.
+- **5. Comparar:** pide dos rutas y muestra si son iguales; si no, los dos tamaños y la posición del primer byte distinto.
 - **6. Generar:** escribe T1 a T6 en `pruebas-caso2/` (la crea si no existe) e informa la ruta absoluta.
 - **7. Pruebas obligatorias:** ver Fase 8.
 - Como en el Caso 1, cada opción va dentro de un `try/catch` y **el programa nunca termina por una excepción**.
@@ -534,7 +540,7 @@ Prueba  Original   Comprimido  Resultado        Restaurado   Tiempo
 T1           0 B        19 B   no aplica        IGUAL        0,010 ms
 T2      10.000 B     1.271 B   reducción 87,29 %  IGUAL      ...
 ...
-T6      (truncado)             RECHAZADO: El archivo está truncado: faltan datos comprimidos
+T6      (truncado)             RECHAZADO: <motivo de la validación que falló>
 ```
 
 **8.3 Resultados esperados**, calculados a mano. Si la salida no coincide, hay un error en la implementación:
@@ -546,9 +552,9 @@ T6      (truncado)             RECHAZADO: El archivo está truncado: faltan dato
 | T3 | 256 B | 2.559 bits | 2.048 bits | 19 + 576 = **595 B** | aumento del 132,42 % |
 | T4 | 39 B | 79 bits | 105 bits | 19 + 23 = **42 B** | aumento del 7,69 % |
 | T5 | 102.400 B | — | — | menor que el original | restaurado IGUAL byte a byte |
-| T6 | — | — | — | — | RECHAZADO, sin archivo de salida |
+| T6 | — | — | — | — | RECHAZADO, sin archivo de salida. Falla la validación 6 si lo que quedó tiene menos bits que bytes el original; si no, la 8 |
 
-**Códigos esperados de T4** (con el desempate de la sección 2.3; 0 = izquierda):
+**Códigos esperados de T4** (con el desempate de la Fase 2.3; 0 = izquierda):
 
 | Símbolo | Frecuencia | Código | Longitud | Bits aportados |
 |---|---|---|---|---|
@@ -578,7 +584,7 @@ Paso a paso de la construcción (para el informe): L+T = 2; A+(LT) = 4 (A va pri
    - el tiempo informado no incluye la lectura ni la escritura en disco;
    - la cabecera fija de 19 bytes y el árbol hacen que los archivos chicos crezcan;
    - un símbolo cuesta al menos 1 bit (reducción máxima del 87,5 %);
-   - Adler-32 detecta errores accidentales, no modificaciones intencionales.
+   - Adler-32 detecta errores accidentales, no modificaciones intencionales, y es algo más débil en archivos de pocos cientos de bytes (sus sumas casi no llegan a dar la vuelta del módulo). Igual, en esos archivos un daño suele romper antes el árbol, la longitud o el relleno.
 2. Word: agregar las secciones "Codificación de Huffman", "Manejo de bits" y "Formato del archivo comprimido", con el mismo estilo que las del Caso 1.
 3. Revisar que `estructuras`, `modelo` y `logica` no importen colecciones de `java.util` ni `java.util.zip`.
 4. Repasar la sección 7 de este plan.
@@ -616,6 +622,6 @@ La forma de trabajo con Git es la misma de la sección 7 del plan del Caso 1.
 | ¿Cómo representar símbolos y frecuencias? ¿Qué estructura para elegir los mínimos? | Arreglo `long[256]` indexado por byte (sección 2.3) y montículo de mínimos: O(n log n) frente a O(n²) con listas |
 | ¿Cómo pasar de códigos de longitud variable a bits reales? | `EscritorBits`: acumula bits con desplazamientos y operaciones a nivel de bits, y vuelca un byte cada 8 bits. Escribir "0" y "1" como texto ocuparía 8 bits por bit: el archivo sería 8 veces más grande que el resultado de Huffman |
 | ¿El tamaño comprimido siempre es menor? | No: T1 (+19 B), T3 (+132 %) y T4 (+7,7 %). Ningún compresor sin pérdida puede achicar todos los archivos (hay más archivos de n bytes que archivos de menos de n bytes). La cabecera es un costo fijo que pesa en los chicos |
-| ¿Cómo garantizar resultados reproducibles con frecuencias iguales? | Desempate por menor símbolo del subárbol (sección 2.3): orden total, sin depender del orden interno del heap. Además, como el árbol viaja en el archivo, el descompresor ni siquiera necesita repetir la construcción |
+| ¿Cómo garantizar resultados reproducibles con frecuencias iguales? | Desempate por menor símbolo del subárbol (Fase 2.3): orden total, sin depender del orden interno del heap. Además, como el árbol viaja en el archivo, el descompresor ni siquiera necesita repetir la construcción |
 | Complejidad | Contar O(N); árbol O(n log n) con n ≤ 256; codificar O(N); decodificar O(N · L), con L la longitud promedio del código; memoria O(N) |
 | Defensa: ¿qué cambiaría con otra escala? | Archivos de varios GB: procesar por bloques con un árbol por bloque (extensión opcional del enunciado). Datos con secuencias repetidas largas: combinar con LZ77 (como hace Deflate), porque Huffman solo mira la frecuencia de cada byte suelto y no su contexto |
