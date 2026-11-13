@@ -22,4 +22,5 @@ Reglas para cualquier agente de IA (Claude, Copilot, Codex, etc.) que trabaje en
 - Las estructuras centrales (árbol AVL, grafo, heap, cola, pila, árbol de Huffman, etc.) deben ser **implementadas por el equipo**; no usar bibliotecas que ya resuelvan su lógica (por ejemplo `java.util.PriorityQueue`, `TreeMap` o librerías de grafos).
 - Mantener separadas las capas: estructuras de datos, lógica de negocio e interfaz de consola.
 - **No** escribir pruebas unitarias (JUnit u otras) ni subir código de prueba al repositorio: exceden el contenido de la materia. Para verificar algo, hacerlo de forma temporal fuera del repositorio o ejecutando el programa. Las pruebas obligatorias del enunciado se ejecutan desde la opción correspondiente del menú.
-- El plan de trabajo del Caso 1 está en `docs/plan-caso-1.md`.
+- El plan de trabajo del Caso 1 está en `docs/plan-caso-1.md` y el del Caso 2, en `docs/plan-caso-2.md`. Los dos ya están implementados.
+- **Lo que falta hacer está en `docs/pendientes.md`.** Leerlo antes de empezar cualquier tarea y actualizarlo al terminar un punto.
