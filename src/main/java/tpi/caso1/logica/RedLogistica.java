@@ -22,6 +22,9 @@ public class RedLogistica {
 
     private final ArbolAVL<String, Centro> centros = new ArbolAVL<>();
 
+    /** Tiempo máximo de una ruta. Evita que la suma de tiempos en Dijkstra supere el máximo de un int. */
+    private static final int TIEMPO_MAXIMO = 1_000_000;
+
     // ------------------------------------------------------------------
     // Centros
     // ------------------------------------------------------------------
@@ -149,9 +152,9 @@ public class RedLogistica {
      *
      * @param origen        id del centro donde empieza la ruta
      * @param destino       id del centro donde termina la ruta
-     * @param tiempo        minutos, mayor o igual a 0
+     * @param tiempo        minutos, entre 0 y TIEMPO_MAXIMO
      * @param bidireccional true si se puede recorrer en los dos sentidos
-     * @throws OperacionInvalidaException si algún centro no existe, el tiempo es negativo,
+     * @throws OperacionInvalidaException si algún centro no existe, el tiempo está fuera de rango,
      *                                    los dos centros son el mismo o la ruta ya existe
      */
     public void altaRuta(String origen, String destino, int tiempo, boolean bidireccional) {
@@ -183,7 +186,7 @@ public class RedLogistica {
      * sentidos, porque es un único objeto. Complejidad O(log V + grado).
      *
      * @throws OperacionInvalidaException si algún centro no existe, la ruta no existe
-     *                                    o el tiempo es negativo
+     *                                    o el tiempo está fuera de rango
      */
     public void modificarTiempoRuta(String origen, String destino, int nuevoTiempo) {
         Ruta ruta = rutaExistente(origen, destino);
@@ -344,13 +347,16 @@ public class RedLogistica {
     }
 
     /**
-     * Comprueba que un tiempo no sea negativo. Dijkstra necesita pesos no negativos.
+     * Comprueba que un tiempo no sea negativo ni supere el máximo. Dijkstra necesita pesos no negativos.
      *
-     * @throws OperacionInvalidaException si el tiempo es menor que 0
+     * @throws OperacionInvalidaException si el tiempo es menor que 0 o mayor que TIEMPO_MAXIMO
      */
     private static void validarTiempo(int tiempo) {
         if (tiempo < 0) {
             throw new OperacionInvalidaException("El tiempo debe ser un entero mayor o igual a 0");
+        }
+        if (tiempo > TIEMPO_MAXIMO) {
+            throw new OperacionInvalidaException("El tiempo no puede superar 1.000.000 minutos");
         }
     }
 

@@ -110,7 +110,7 @@ Al iniciar, la red se carga automáticamente con los datos del enunciado. El men
 | 6. Restaurar datos iniciales | Descarta los cambios y vuelve a cargar los datos del enunciado |
 | 7. Ejecutar pruebas obligatorias | Corre las pruebas del enunciado sobre una red nueva, sin tocar la red en uso |
 
-Los identificadores se normalizan: se les quitan los espacios de los extremos y se pasan a mayúsculas, así que `a` y `A` son el mismo centro. Si se ingresa un dato inválido (letras donde va un número, un id duplicado, un tiempo negativo), el programa informa el problema y sigue funcionando.
+Si se ingresa un dato inválido (letras donde va un número, un id duplicado, un tiempo negativo o mayor a 1.000.000 minutos), el programa informa el problema y sigue funcionando.
 
 ### Datos de prueba
 
@@ -144,7 +144,7 @@ El Caso 1 no lee ni escribe archivos: los datos se guardan solo en memoria y se 
 - **El id de un centro no se modifica:** es la clave del árbol AVL. Para cambiarlo hay que dar de baja el centro y volver a darlo de alta.
 - **Contar las rutas cuesta O(V + E):** se cuentan recorriendo la red en lugar de llevar un contador aparte.
 - **La matriz de tiempos se muestra hasta 20 centros:** con más no entra en pantalla, y se muestran solo la lista de adyacencia y el resumen.
-- **Tiempos enteros en minutos y no negativos:** es la condición que necesita Dijkstra.
+- **Tiempo máximo por ruta: 1.000.000 minutos:** así la suma de un camino no supera el máximo de un `int`, que alcanzaría recién con más de 2.147 tramos de tiempo máximo.
 - **Caracteres de la consola:** las flechas y líneas se dibujan con ASCII (`->`, `+-`) para que se vean bien en cualquier consola de Windows.
 
 ## Caso 2: archivo histórico de mensajes de sensores
