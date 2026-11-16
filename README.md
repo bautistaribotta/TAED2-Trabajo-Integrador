@@ -109,6 +109,7 @@ Al iniciar, la red se carga automáticamente con los datos del enunciado. El men
 | 5. Mostrar la red | Lista de adyacencia, matriz de tiempos y resumen |
 | 6. Restaurar datos iniciales | Descarta los cambios y vuelve a cargar los datos del enunciado |
 | 7. Ejecutar pruebas obligatorias | Corre las pruebas del enunciado sobre una red nueva, sin tocar la red en uso |
+| 8. Ejecutar pruebas adicionales | Corre 13 pruebas de casos límite y validaciones, y compara cada resultado con el esperado |
 
 Si se ingresa un dato inválido (letras donde va un número, un id duplicado, un tiempo negativo o mayor a 1.000.000 minutos), el programa informa el problema y sigue funcionando.
 
@@ -131,6 +132,17 @@ La opción 7 ejecuta, en este orden: A → F, A → G, B → E, A → A, A → Z
 | A → F con G aislado | Encontrado (no cambia) | A → C → D → F | 18 min |
 
 Recorridos de exploración desde A (opción 4): BFS visita A, B, C, D, E, F, G y DFS visita A, B, C, D, F, E, G.
+
+La opción 8 agrega 13 pruebas de casos límite, todas correctas:
+- una ruta de un solo sentido, que se puede usar para ir pero no para volver;
+- deshabilitar y volver a habilitar una ruta (A → F pasa de 18 a 19 min y vuelve a 18);
+- un id duplicado, y un id escrito con minúsculas y espacios;
+- tiempos de −1, 0, 1.000.000 y 1.000.001;
+- rutas de un centro a sí mismo, duplicadas o hacia un centro inexistente;
+- la baja de un centro con rutas;
+- BFS en una red desconectada.
+
+**Extensiones opcionales del enunciado implementadas:** vías de un solo sentido, actualización de tiempos e índice autobalanceado de centros (árbol AVL).
 
 ### Formato de los archivos
 
@@ -162,6 +174,7 @@ Comprime y descomprime archivos cualesquiera (texto o binarios, cualquier byte d
 | 5. Comparar dos archivos | Indica si son iguales byte a byte o la posición del primer byte distinto |
 | 6. Generar archivos de prueba | Escribe T1 a T6 en una carpeta (por defecto `pruebas-caso2/`, que no se sube al repositorio) |
 | 7. Ejecutar pruebas obligatorias | Comprime, descomprime y compara T1 a T5 en memoria, e intenta descomprimir T6 esperando el rechazo |
+| 8. Ejecutar pruebas adicionales | Corre 14 pruebas con archivos dañados de distintas formas y archivos válidos poco comunes |
 
 Las rutas pueden ser relativas a la carpeta desde donde se ejecuta el programa o absolutas, con o sin comillas. Antes de sobrescribir un archivo se pide confirmación, y la salida nunca puede ser el mismo archivo que la entrada.
 
@@ -180,16 +193,33 @@ Los genera la opción 6. No se suben al repositorio porque se obtienen siempre i
 
 Resultados de la opción 7:
 
-| Prueba | Original | Comprimido | Resultado | Restaurado |
-|---|---|---|---|---|
-| T1 | 0 B | 19 B | no aplica (original vacío) | igual |
-| T2 | 10.000 B | 1.271 B | reducción del 87,29 % | igual |
-| T3 | 256 B | 595 B | aumento del 132,42 % | igual |
-| T4 | 39 B | 42 B | aumento del 7,69 % | igual |
-| T5 | 102.400 B | 77.048 B | reducción del 24,76 % | igual |
-| T6 | 38.524 B | — | rechazado: "El archivo está truncado: faltan datos comprimidos" | sin archivo de salida |
+| Prueba | Original | Comprimido | Resultado | Restaurado | Tiempo (comp. + desc.) |
+|---|---|---|---|---|---|
+| T1 | 0 B | 19 B | no aplica (original vacío) | igual | 2,676 + 0,439 ms |
+| T2 | 10.000 B | 1.271 B | reducción del 87,29 % | igual | 1,404 + 1,353 ms |
+| T3 | 256 B | 595 B | aumento del 132,42 % | igual | 1,250 + 0,310 ms |
+| T4 | 39 B | 42 B | aumento del 7,69 % | igual | 0,085 + 0,026 ms |
+| T5 | 102.400 B | 77.048 B | reducción del 24,76 % | igual | 10,515 + 5,494 ms |
+| T6 | 38.524 B | — | rechazado: "El archivo está truncado: faltan datos comprimidos" | sin archivo de salida | — |
+
+Los tiempos son de una ejecución y cambian un poco en cada corrida; miden solo el proceso en memoria. T1 tarda más que T4 porque es la primera prueba e incluye el arranque de la máquina virtual de Java.
 
 Los tamaños de T1 a T4 coinciden con los calculados a mano en el plan. En T4 los códigos son `R` 00, `O` 01, `|` 10, `K` 111, `E` 1100, `A` 11010, `L` 110110 y `T` 110111: 105 bits de datos, 2,69 bits por símbolo en lugar de 8.
+
+La opción 8 agrega 14 pruebas, todas correctas:
+- **Archivos dañados**, además del truncado de T6:
+  - firma cambiada, o un archivo que no es comprimido;
+  - un archivo más corto que la cabecera;
+  - versión cambiada;
+  - tamaño original alterado;
+  - árbol dañado;
+  - un bit cambiado en los datos (en T4 solo lo detecta Adler-32);
+  - un byte de más al final;
+  - el relleno distinto de cero;
+  - un byte de menos.
+- **Archivos válidos poco comunes:** un solo byte, dos símbolos y 100.000 bytes aleatorios.
+
+**Extensión opcional del enunciado implementada:** el estudio del efecto de la distribución de frecuencias. T2, T3, T4, T5 y el archivo aleatorio cubren distribuciones muy distintas, y el informe analiza cómo comprime cada una.
 
 ### Formato del archivo comprimido
 
