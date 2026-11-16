@@ -16,3 +16,6 @@ pruebas-caso2/
 
 # Bloqueos de LibreOffice mientras un documento está abierto
 .~lock.*#
+
+# Carpeta y ZIP de entrega (se generan aparte)
+entrega/
