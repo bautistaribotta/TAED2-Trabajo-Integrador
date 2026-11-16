@@ -111,7 +111,7 @@ Al iniciar, la red se carga automáticamente con los datos del enunciado. El men
 | 7. Ejecutar pruebas obligatorias | Corre las pruebas del enunciado sobre una red nueva, sin tocar la red en uso |
 | 8. Ejecutar pruebas adicionales | Corre 13 pruebas de casos límite y validaciones, y compara cada resultado con el esperado |
 
-Si se ingresa un dato inválido (letras donde va un número, un id duplicado, un tiempo negativo o mayor a 1.000.000 minutos), el programa informa el problema y sigue funcionando.
+Los identificadores se normalizan: se les quitan los espacios de los extremos y se pasan a mayúsculas, así que `a` y `A` son el mismo centro. Si se ingresa un dato inválido (letras donde va un número, un id duplicado, un tiempo negativo o mayor a 1.000.000 minutos), el programa informa el problema y sigue funcionando.
 
 ### Datos de prueba
 
