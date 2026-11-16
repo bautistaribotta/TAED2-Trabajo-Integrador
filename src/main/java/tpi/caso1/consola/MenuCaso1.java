@@ -31,6 +31,7 @@ public class MenuCaso1 {
              5. Mostrar la red
              6. Restaurar datos iniciales del enunciado
              7. Ejecutar pruebas obligatorias
+             8. Ejecutar pruebas adicionales (casos límite y validaciones)
              0. Volver al menú principal""";
 
     private static final String MENU_CENTROS = """
@@ -89,7 +90,7 @@ public class MenuCaso1 {
         int opcion;
         do {
             System.out.println(MENU_PRINCIPAL);
-            opcion = entrada.leerEntero("Opción: ", 0, 7);
+            opcion = entrada.leerEntero("Opción: ", 0, 8);
             switch (opcion) {
                 case 1 -> menuCentros();
                 case 2 -> menuRutas();
@@ -98,6 +99,7 @@ public class MenuCaso1 {
                 case 5 -> ejecutar(() -> System.out.println(Vista.red(red)));
                 case 6 -> ejecutar(this::restaurarDatosIniciales);
                 case 7 -> ejecutar(this::ejecutarPruebas);
+                case 8 -> ejecutar(() -> new PruebasAdicionalesCaso1().ejecutar());
                 default -> {
                     // 0: volver al menú principal
                 }
