@@ -66,7 +66,7 @@ public final class CompresorHuffman {
     /**
      * Reconstruye el contenido original a partir de un archivo .huf.
      *
-     * Aplica, en orden, las 10 validaciones del plan. Si alguna falla lanza
+     * Aplica, en orden, las 10 validaciones del formato. Si alguna falla lanza
      * ArchivoDanadoException con el motivo; en ese caso no devuelve nada, así que quien lo
      * llama no puede escribir un archivo parcial ni informar un éxito falso.
      *

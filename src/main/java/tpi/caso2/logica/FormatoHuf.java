@@ -80,7 +80,7 @@ public final class FormatoHuf {
     }
 
     /**
-     * Lee la cabecera y aplica las validaciones 1 a 5 del plan:
+     * Lee la cabecera y aplica las validaciones 1 a 5 del formato:
      * 1. que el archivo tenga al menos los 19 bytes de la cabecera;
      * 2. que empiece con la firma THUF;
      * 3. que la versión sea 1;

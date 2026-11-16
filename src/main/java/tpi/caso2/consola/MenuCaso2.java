@@ -40,7 +40,7 @@ public class MenuCaso2 {
     /** Carpeta donde se generan los archivos de prueba si el usuario no indica otra. */
     private static final String CARPETA_PRUEBAS = "pruebas-caso2";
 
-    /** Tamaños comprimidos esperados de T1 a T4, calculados a mano en el plan (Fase 8.3). */
+    /** Tamaños comprimidos esperados de T1 a T4, calculados a mano antes de programar. */
     private static final long[] TAMANIOS_ESPERADOS = {19, 1271, 595, 42};
 
     private final Entrada entrada;
@@ -191,8 +191,8 @@ public class MenuCaso2 {
     /**
      * 7. Pruebas obligatorias del enunciado. Trabajan en memoria con los contenidos de T1 a
      * T6, así no dependen de que existan los archivos ni de lo que el usuario haya cambiado.
-     * Los resultados se calculan al ejecutar; los tamaños esperados de T1 a T4 están en el
-     * plan, calculados a mano, y solo se usan para comparar.
+     * Los resultados se calculan al ejecutar; los tamaños esperados de T1 a T4 se calcularon
+     * a mano antes de programar y solo se usan para comparar.
      */
     private void ejecutarPruebas() {
         System.out.println("===== PRUEBAS OBLIGATORIAS DEL CASO 2 =====");

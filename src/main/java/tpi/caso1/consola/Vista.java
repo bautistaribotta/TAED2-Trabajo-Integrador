@@ -21,7 +21,7 @@ import java.util.Iterator;
  */
 public final class Vista {
 
-    /** Aclaración que pide el plan al final de cada exploración (sección 7.4). */
+    /** Aclaración que se muestra al final de cada exploración, para diferenciarla del camino mínimo. */
     private static final String ACLARACION_EXPLORACION =
             "Este recorrido muestra qué centros son alcanzables y en qué orden se descubren;\n"
             + "no calcula tiempos mínimos. Para eso usar la opción Camino mínimo (Dijkstra).";

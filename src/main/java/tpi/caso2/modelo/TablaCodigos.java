@@ -15,7 +15,9 @@ import tpi.estructuras.ArbolHuffman;
  * pero son códigos distintos.
  *
  * Un long alcanza: con archivos de hasta unos 2.147 millones de bytes, ningún código de
- * Huffman puede pasar de 44 bits (ver el plan del Caso 2, sección 2.3).
+ * Huffman puede pasar de 44 bits. Para que un código mida d bits, la suma de las
+ * frecuencias tiene que ser al menos el número de Fibonacci F(d + 2), y F(47) ya supera
+ * ese tamaño máximo.
  */
 public class TablaCodigos {
 
