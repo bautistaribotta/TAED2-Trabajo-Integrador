@@ -24,3 +24,4 @@ Reglas para cualquier agente de IA (Claude, Copilot, Codex, etc.) que trabaje en
 - **No** escribir pruebas unitarias (JUnit u otras) ni subir código de prueba al repositorio: exceden el contenido de la materia. Para verificar algo, hacerlo de forma temporal fuera del repositorio o ejecutando el programa. Las pruebas obligatorias del enunciado se ejecutan desde la opción correspondiente del menú.
 - El plan de trabajo del Caso 1 está en `docs/plan-caso-1.md` y el del Caso 2, en `docs/plan-caso-2.md`. Los dos ya están implementados.
 - **Lo que falta hacer está en `docs/pendientes.md`.** Leerlo antes de empezar cualquier tarea y actualizarlo al terminar un punto.
+- **Si cambia el Word o el código, hay que volver a exportar el PDF y regenerar el ZIP de entrega.** Los pasos están en la sección "ZIP de entrega" de `docs/pendientes.md`.
