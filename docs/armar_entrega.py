@@ -38,8 +38,8 @@ texto = open(readme, encoding='utf-8').read()
 corte = texto.find('\n---\n\n# Trabajo Práctico Integrador')
 assert corte > 0
 texto = texto[:corte].rstrip() + '\n'
-viejo = texto[texto.find('Este README tiene dos partes'):texto.find('## Requisitos')]
-assert 'plan-caso-1.md' in viejo
+viejo = texto[texto.find('Este README tiene dos partes'):texto.find('## Instalación y ejecución')]
+assert 'plan-caso-1.md' in viejo and len(viejo) < 1000
 texto = texto.replace(viejo, 'El informe del trabajo, con el análisis, las decisiones de diseño, los diagramas, '
                              'el pseudocódigo y los resultados de las pruebas, está en '
                              '`Trabajo Practico Integrador.pdf`.\n\n')

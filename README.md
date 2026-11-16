@@ -8,22 +8,79 @@ Este README tiene dos partes: primero la documentación del proyecto (cómo comp
 
 Los planes de implementación, con las decisiones de diseño, la API de cada clase y el pseudocódigo, están en [`docs/plan-caso-1.md`](docs/plan-caso-1.md) y [`docs/plan-caso-2.md`](docs/plan-caso-2.md).
 
-## Requisitos
+## Instalación y ejecución
 
-- **JDK 25 (LTS)**. Por ejemplo, Eclipse Temurin 25 (`winget install EclipseAdoptium.Temurin.25.JDK` o desde https://adoptium.net). Verificar con `java -version`.
-- **Maven 3.9 o posterior**, o el Maven que trae IntelliJ IDEA. Verificar con `mvn -version`.
-- No hay dependencias externas: el `pom.xml` solo usa los plugins estándar de compilación y empaquetado.
+El programa es una aplicación de consola en Java, sin dependencias externas. Lo único que hace falta es el **JDK 25** y, para la opción A, **Maven**. Hay tres formas de compilarlo y ejecutarlo; alcanza con una.
 
-## Cómo compilar y ejecutar
+### 1. Instalar el JDK 25
 
-Desde la carpeta del proyecto:
+Si `java -version` ya muestra la versión 25, este paso no hace falta.
+
+- **Windows:** `winget install EclipseAdoptium.Temurin.25.JDK`, o descargar el instalador `.msi` de https://adoptium.net (Temurin 25). Al instalarlo, dejar marcadas las opciones *Add to PATH* y *Set JAVA_HOME*.
+- **macOS:** `brew install --cask temurin@25`, o el instalador `.pkg` de https://adoptium.net.
+- **Linux:** el paquete de Temurin 25 de https://adoptium.net (tiene repositorios para apt y dnf), o el JDK 25 de la distribución si ya lo ofrece.
+
+Después de instalarlo, **abrir una consola nueva** y verificar:
+
+```bash
+java -version
+javac -version
+```
+
+Las dos tienen que mostrar la versión 25.
+
+### 2. Compilar y ejecutar
+
+Todos los comandos se ejecutan desde la carpeta del proyecto, la que tiene el `pom.xml`.
+
+**Opción A: con Maven.** Requiere Maven 3.9 o posterior (verificar con `mvn -version`). Si no está instalado: en Windows, descargar el `.zip` *Binary* de https://maven.apache.org/download.cgi, descomprimirlo y agregar su carpeta `bin` al `PATH`; en macOS, `brew install maven`; en Linux, `sudo apt install maven` o el equivalente.
 
 ```bash
 mvn package
 java -jar target/tpi-taed2-1.0-SNAPSHOT.jar
 ```
 
-Desde IntelliJ IDEA: *File → Open* y elegir la carpeta del proyecto (lo reconoce por el `pom.xml`). En *File → Project Structure → SDK* elegir JDK 25 y ejecutar la clase `tpi.Main`.
+La primera vez, Maven necesita conexión a internet para descargar sus plugins de compilación; después funciona sin conexión.
+
+**Opción B: solo con el JDK, sin Maven.** Compila las clases en la carpeta `out` y ejecuta el programa.
+
+En Windows (PowerShell):
+
+```powershell
+javac -encoding UTF-8 -d out (Get-ChildItem -Recurse src -Filter *.java).FullName
+java -cp out tpi.Main
+```
+
+En Windows (cmd):
+
+```bat
+dir /s /b src\*.java > fuentes.txt
+javac -encoding UTF-8 -d out @fuentes.txt
+java -cp out tpi.Main
+```
+
+En macOS o Linux:
+
+```bash
+javac -encoding UTF-8 -d out $(find src -name "*.java")
+java -cp out tpi.Main
+```
+
+**Opción C: con IntelliJ IDEA.** No hace falta instalar Maven, porque IntelliJ trae el suyo, y el JDK se puede descargar desde el mismo programa.
+
+1. *File → Open* y elegir la carpeta del proyecto. IntelliJ lo reconoce como proyecto Maven por el `pom.xml`.
+2. En *File → Project Structure → SDK*, elegir JDK 25. Si no está instalado, usar *Download JDK* y elegir Eclipse Temurin 25.
+3. Abrir `src/main/java/tpi/Main.java` y ejecutarla con el botón verde junto a `main`.
+
+### Si algo falla
+
+- **`java` o `mvn` no se reconoce como comando:** la consola se abrió antes de instalarlo, o la carpeta `bin` no está en el `PATH`. Abrir una consola nueva.
+- **`invalid target release: 25` o `release version 25 not supported`:** se está usando un JDK más viejo. Revisar `java -version` y, con Maven, la línea *Java version* de `mvn -version`, que tiene que decir 25. Si no, apuntar la variable `JAVA_HOME` a la carpeta del JDK 25.
+- **Los acentos se ven mal en la consola de Windows:** ejecutar `chcp 65001` antes de iniciar el programa, o usar Windows Terminal.
+
+### Archivos que genera el programa
+
+El Caso 2 crea la carpeta `pruebas-caso2/` dentro de la carpeta desde la que se ejecuta el programa, con los archivos de prueba y sus versiones comprimidas. Se puede borrar sin problemas: la opción 6 la vuelve a generar.
 
 Al iniciar se muestra un menú principal para elegir el caso:
 
