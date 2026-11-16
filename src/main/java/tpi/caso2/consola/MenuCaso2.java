@@ -34,6 +34,7 @@ public class MenuCaso2 {
              5. Comparar dos archivos byte a byte
              6. Generar archivos de prueba T1 a T6
              7. Ejecutar pruebas obligatorias
+             8. Ejecutar pruebas adicionales (archivos dañados y casos límite)
              0. Volver al menú principal""";
 
     /** Carpeta donde se generan los archivos de prueba si el usuario no indica otra. */
@@ -60,7 +61,7 @@ public class MenuCaso2 {
         int opcion;
         do {
             System.out.println(MENU);
-            opcion = entrada.leerEntero("Opción: ", 0, 7);
+            opcion = entrada.leerEntero("Opción: ", 0, 8);
             switch (opcion) {
                 case 1 -> ejecutar(this::comprimir);
                 case 2 -> ejecutar(this::descomprimir);
@@ -69,6 +70,7 @@ public class MenuCaso2 {
                 case 5 -> ejecutar(this::comparar);
                 case 6 -> ejecutar(this::generarArchivosDePrueba);
                 case 7 -> ejecutar(this::ejecutarPruebas);
+                case 8 -> ejecutar(() -> new PruebasAdicionalesCaso2().ejecutar());
                 default -> {
                     // 0: volver al menú principal
                 }
